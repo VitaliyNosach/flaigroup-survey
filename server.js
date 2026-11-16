@@ -10,19 +10,27 @@ const REQUIRED = 14;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Init storage
-if (!fs.existsSync(RESPONSES_FILE)) {
-  fs.writeFileSync(RESPONSES_FILE, '[]');
-}
+// In-memory storage — always starts fresh on each deploy
+let memoryResponses = [];
 
 function readResponses() {
-  try { return JSON.parse(fs.readFileSync(RESPONSES_FILE, 'utf8')); }
-  catch { return []; }
+  return memoryResponses;
 }
 
 function writeResponses(data) {
-  fs.writeFileSync(RESPONSES_FILE, JSON.stringify(data, null, 2));
+  memoryResponses = data;
+  // Also write to file as backup
+  try { fs.writeFileSync(RESPONSES_FILE, JSON.stringify(data, null, 2)); } catch {}
 }
+
+// Reset (secret endpoint)
+app.get('/api/reset', (req, res) => {
+  if (req.query.key !== 'flai2026') {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+  writeResponses([]);
+  res.json({ status: 'ok', message: 'Ответы сброшены' });
+});
 
 // Status
 app.get('/api/status', (req, res) => {
