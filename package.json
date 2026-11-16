@@ -1,0 +1,12 @@
+{
+  "name": "flaigroup-survey",
+  "version": "1.0.0",
+  "description": "FLAI Group — внутренний eNPS-опросник",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Flai Group — Результаты</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --brand:    #111111;
+    --accent:   #5B50F0;
+    --accent2:  #7C74F3;
+    --accent-bg:#F0EFFF;
+    --success:  #22C55E;
+    --warn:     #F59E0B;
+    --danger:   #F43F5E;
+    --text:     #18181B;
+    --sub:      #52525B;
+    --muted:    #A1A1AA;
+    --border:   #E4E4E7;
+    --bg:       #F4F4F6;
+    --card:     #FFFFFF;
+    --radius:   16px;
+    --shadow:   0 1px 4px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:'Inter',-apple-system,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding:28px 16px 72px;
+  }
+  .container { max-width:940px; margin:0 auto; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display:flex; align-items:center; gap:14px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px 24px;
+    margin-bottom:24px;
+    box-shadow:var(--shadow);
+  }
+  .wordmark { font-size:22px; font-weight:800; letter-spacing:-.03em; color:var(--brand); }
+  .wordmark span { color:var(--accent); }
+  .topbar-title { font-size:15px; font-weight:600; letter-spacing:-.01em; }
+  .topbar-sub { font-size:12px; color:var(--muted); margin-top:1px; }
+  .topbar-badge {
+    margin-left:auto;
+    background:var(--accent-bg); color:var(--accent);
+    border-radius:100px; padding:5px 14px;
+    font-size:12px; font-weight:600;
+  }
+
+  /* ── WAITING ── */
+  #waiting {
+    display:none;
+    text-align:center;
+    padding:80px 24px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .wait-ring {
+    width:110px; height:110px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 20px;
+    font-size:26px; font-weight:800; color:var(--accent);
+    background: conic-gradient(var(--accent) 0%, var(--border) 0%);
+    position:relative;
+  }
+  .wait-ring::before {
+    content:''; position:absolute;
+    width:84px; height:84px;
+    border-radius:50%; background:white;
+  }
+  .wait-ring span { position:relative; z-index:1; }
+  #waiting h2 { font-size:20px; font-weight:700; letter-spacing:-.02em; margin-bottom:8px; }
+  #waiting p { color:var(--sub); font-size:14px; line-height:1.6; }
+  .btn-refresh {
+    display:inline-flex; align-items:center; gap:7px;
+    margin-top:24px;
+    background:var(--brand); color:white;
+    border:none; border-radius:10px;
+    padding:10px 22px; font-size:14px; font-weight:600;
+    font-family:inherit; cursor:pointer;
+    transition:background .15s;
+  }
+  .btn-refresh:hover { background:#2D2D2D; }
+
+  /* ── GRID ── */
+  .grid { display:grid; gap:16px; }
+  .g2 { grid-template-columns:1fr 1fr; }
+  .g3 { grid-template-columns:1fr 1fr 1fr; }
+  @media(max-width:640px){ .g2,.g3 { grid-template-columns:1fr; } }
+
+  .card {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px;
+    box-shadow:var(--shadow);
+  }
+  .card-label {
+    font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.07em;
+    color:var(--muted);
+    margin-bottom:14px;
+  }
+
+  /* ── eNPS ── */
+  .enps-num {
+    font-size:60px; font-weight:800; letter-spacing:-.04em;
+    line-height:1; margin-bottom:4px;
+  }
+  .c-green { color:var(--success); }
+  .c-warn  { color:var(--warn); }
+  .c-red   { color:var(--danger); }
+  .c-blue  { color:var(--accent); }
+
+  .enps-row { display:flex; gap:8px; margin-top:16px; }
+  .enps-seg {
+    flex:1; padding:10px 8px; border-radius:10px;
+    text-align:center;
+  }
+  .enps-seg .n { font-size:18px; font-weight:700; }
+  .enps-seg .l { font-size:11px; margin-top:2px; line-height:1.3; }
+  .s-pro { background:#DCFCE7; color:#15803D; }
+  .s-neu { background:#FEF9C3; color:#A16207; }
+  .s-det { background:#FFE4E6; color:#BE123C; }
+
+  /* ── BIG SCORE ── */
+  .score-num { font-size:52px; font-weight:800; letter-spacing:-.04em; line-height:1; }
+  .score-max { font-size:18px; font-weight:500; color:var(--muted); }
+
+  /* ── STATUS TAG ── */
+  .tag {
+    display:inline-flex; align-items:center; gap:5px;
+    border-radius:6px; padding:4px 10px;
+    font-size:12px; font-weight:600;
+    margin-top:8px;
+  }
+  .tag-green { background:#DCFCE7; color:#15803D; }
+  .tag-warn  { background:#FEF9C3; color:#A16207; }
+  .tag-red   { background:#FFE4E6; color:#BE123C; }
+  .tag-blue  { background:var(--accent-bg); color:var(--accent); }
+
+  /* ── BARS ── */
+  .bar-row { margin-bottom:14px; }
+  .bar-row:last-child { margin-bottom:0; }
+  .bar-header { display:flex; justify-content:space-between; font-size:13px; font-weight:500; margin-bottom:5px; }
+  .bar-header .bv { font-weight:700; }
+  .track { height:8px; background:var(--border); border-radius:99px; overflow:hidden; }
+  .fill  { height:100%; border-radius:99px; transition:width 1.1s cubic-bezier(.16,1,.3,1); }
+
+  /* ── Q DETAIL ── */
+  .qd { margin-bottom:11px; }
+  .qd:last-child { margin-bottom:0; }
+  .qd-label { font-size:12px; color:var(--sub); margin-bottom:4px; }
+  .qd-row { display:flex; align-items:center; gap:10px; }
+  .qd-track { flex:1; height:7px; background:var(--border); border-radius:99px; overflow:hidden; }
+  .qd-fill  { height:100%; border-radius:99px; }
+  .qd-val   { font-size:13px; font-weight:700; min-width:32px; text-align:right; }
+
+  /* ── Q3 DIST ── */
+  .dist-item { margin-bottom:9px; }
+  .dist-item:last-child { margin-bottom:0; }
+  .dist-lbl { font-size:12px; color:var(--sub); margin-bottom:4px; display:flex; justify-content:space-between; }
+  .dist-track { height:20px; background:var(--border); border-radius:7px; overflow:hidden; }
+  .dist-fill {
+    height:100%; border-radius:7px;
+    display:flex; align-items:center; padding-left:9px;
+    color:white; font-size:11px; font-weight:600;
+    min-width:28px; transition:width 1.1s cubic-bezier(.16,1,.3,1);
+  }
+
+  /* ── COMMENT ── */
+  .comment {
+    background:var(--bg);
+    border-left:3px solid var(--accent);
+    border-radius:0 10px 10px 0;
+    padding:11px 14px;
+    font-size:13px; line-height:1.6;
+    margin-bottom:8px;
+    color:var(--text);
+  }
+  .comment:last-child { margin-bottom:0; }
+  .no-data { font-size:13px; color:var(--muted); font-style:italic; }
+
+  /* ── SECTION HEADER ── */
+  .sh {
+    font-size:13px; font-weight:700;
+    letter-spacing:-.01em;
+    margin:28px 0 12px;
+    display:flex; align-items:center; gap:10px;
+    color:var(--sub);
+  }
+  .sh::after { content:''; flex:1; height:1px; background:var(--border); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="topbar">
+    <div class="wordmark">Flai<span>.</span></div>
+    <div>
+      <div class="topbar-title">Результаты опроса</div>
+      <div class="topbar-sub" id="topbarSub">Загружаем...</div>
+    </div>
+    <div class="topbar-badge" id="topbarBadge">—</div>
+  </div>
+
+  <!-- WAITING -->
+  <div id="waiting">
+    <div class="wait-ring" id="waitRing"><span id="waitText">0/13</span></div>
+    <h2>Ещё собираем ответы</h2>
+    <p>Результаты появятся автоматически,<br/>когда ответят все <strong id="waitRequired">13</strong> участников</p>
+    <button class="btn-refresh" onclick="load()">↻ Обновить</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dash" style="display:none">
+
+    <div class="sh">📊 Ключевые показатели</div>
+    <div class="grid g3">
+      <div class="card">
+        <div class="card-label">eNPS — вопрос 1</div>
+        <div class="enps-num" id="enpsNum">—</div>
+        <div id="enpsTag"></div>
+        <div class="enps-row">
+          <div class="enps-seg s-pro"><div class="n" id="epro">—</div><div class="l">👍 Сторон&shy;ники<br/>9–10</div></div>
+          <div class="enps-seg s-neu"><div class="n" id="eneu">—</div><div class="l">😐 Нейт&shy;ральные<br/>7–8</div></div>
+          <div class="enps-seg s-det"><div class="n" id="edet">—</div><div class="l">👎 Кри&shy;тики<br/>0–6</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Удовлетворённость — вопрос 2</div>
+        <div><span class="score-num c-blue" id="satNum">—</span><span class="score-max"> / 10</span></div>
+        <div id="satTag"></div>
+        <div class="track" style="margin-top:16px">
+          <div class="fill" id="satBar" style="width:0%;background:var(--accent)"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Разделы (из 5)</div>
+        <div id="secBars"></div>
+      </div>
+    </div>
+
+    <div class="sh">🔄 Готовность остаться в компании</div>
+    <div class="card">
+      <div class="card-label">Вопрос 3 — Если бы выбирал заново, ты бы выбрал Flai Group?</div>
+      <div id="q3dist"></div>
+    </div>
+
+    <div class="sh">🏗 Организация работы — вопросы 4–6</div>
+    <div class="card"><div id="org"></div></div>
+
+    <div class="sh">📡 Коммуникация — вопросы 8–11</div>
+    <div class="card"><div id="comm"></div></div>
+
+    <div class="sh">🧭 Управление — вопросы 12–15</div>
+    <div class="card"><div id="mgmt"></div></div>
+
+    <div class="sh">🤝 Атмосфера и доверие — вопросы 16–17</div>
+    <div class="card"><div id="atm"></div></div>
+
+    <div class="sh">💬 Что мешает организации работы — вопрос 7</div>
+    <div class="card"><div id="q7"></div></div>
+
+    <div class="sh">💡 Предложения и пожелания — вопрос 18</div>
+    <div class="card"><div id="q18"></div></div>
+
+  </div>
+</div>
+
+<script>
+const QL = {
+  q4:'Понятность обязанностей и ожиданий',
+  q5:'Достаточность ресурсов и полномочий',
+  q6:'Справедливость распределения нагрузки',
+  q8:'К кому обращаться по вопросам',
+  q9:'Скорость ответов от руководства',
+  q10:'Регулярность обратной связи',
+  q11:'Информированность о делах компании',
+  q12:'Комфорт сообщать о проблемах',
+  q13:'Независимость процессов от одного человека',
+  q14:'Понимание руководством трудностей команды',
+  q15:'Понятность решений руководства',
+  q16:'Комфорт работы с коллегами',
+  q17:'Возможность открыто высказываться',
+};
+const Q3L = ['','Определённо да','Скорее да','Не уверен','Скорее нет','Определённо нет'];
+
+function barCol(v,max){ const p=v/max; return p>=.8?'#22C55E':p>=.6?'#F59E0B':'#F43F5E'; }
+
+function tag(v,max){
+  const p=v/max;
+  if(p>=.9) return '<div class="tag tag-green">✅ Очень хорошо</div>';
+  if(p>=.8) return '<div class="tag tag-green">✅ Хорошо</div>';
+  if(p>=.7) return '<div class="tag tag-warn">⚠️ Есть что улучшать</div>';
+  if(p>=.6) return '<div class="tag tag-warn">⚠️ Зона внимания</div>';
+  return '<div class="tag tag-red">🔴 Проблемная зона</div>';
+}
+
+function qBar(key,val){
+  const pct=val?Math.round((val/5)*100):0, col=barCol(val,5);
+  return `<div class="qd">
+    <div class="qd-label">${QL[key]||key}</div>
+    <div class="qd-row">
+      <div class="qd-track"><div class="qd-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="qd-val" style="color:${col}">${val??'—'}</div>
+    </div>
+  </div>`;
+}
+
+function secBar(label,v){
+  const pct=v?Math.round((v/5)*100):0, col=barCol(v,5);
+  return `<div class="bar-row">
+    <div class="bar-header"><span>${label}</span><span class="bv" style="color:${col}">${v??'—'}</span></div>
+    <div class="track"><div class="fill" style="width:${pct}%;background:${col}"></div></div>
+  </div>`;
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function load(){
+  try {
+    const r=await fetch('/api/results');
+    if(!r.ok){
+      const e=await r.json();
+      showWaiting(e.count||0,e.required||13); return;
+    }
+    render(await r.json());
+  } catch(e){ document.getElementById('topbarSub').textContent='Ошибка загрузки'; }
+}
+
+function showWaiting(n,req){
+  document.getElementById('waiting').style.display='block';
+  document.getElementById('dash').style.display='none';
+  document.getElementById('waitText').textContent=`${n}/${req}`;
+  document.getElementById('waitRequired').textContent=req;
+  document.getElementById('topbarBadge').textContent=`${n} из ${req}`;
+  document.getElementById('topbarSub').textContent=`Собрано ${n} из ${req} ответов`;
+  const deg=Math.round((n/req)*360);
+  document.getElementById('waitRing').style.background=
+    `conic-gradient(#5B50F0 ${deg}deg, #E4E4E7 ${deg}deg)`;
+}
+
+function render(d){
+  document.getElementById('waiting').style.display='none';
+  document.getElementById('dash').style.display='block';
+  document.getElementById('topbarBadge').textContent=`${d.n} ответов`;
+  document.getElementById('topbarSub').textContent=`Итоговые результаты — ${d.n} участников`;
+
+  // eNPS
+  const e=d.eNPS, sign=e>=0?'+':'';
+  const enEl=document.getElementById('enpsNum');
+  enEl.textContent=sign+e;
+  enEl.className='enps-num '+(e>=30?'c-green':e>=0?'c-warn':'c-red');
+  document.getElementById('enpsTag').innerHTML=
+    e>=50?'<div class="tag tag-green">✅ Отличная лояльность</div>':
+    e>=30?'<div class="tag tag-green">✅ Хорошая лояльность</div>':
+    e>=0 ?'<div class="tag tag-warn">⚠️ Нейтральная лояльность</div>':
+          '<div class="tag tag-red">🔴 Негативная лояльность</div>';
+  document.getElementById('epro').textContent=d.promoters;
+  document.getElementById('eneu').textContent=d.neutrals;
+  document.getElementById('edet').textContent=d.detractors;
+
+  // Satisfaction
+  const s=d.q2avg;
+  document.getElementById('satNum').textContent=s??'—';
+  document.getElementById('satBar').style.width=(s?s*10:0)+'%';
+  document.getElementById('satTag').innerHTML=s?tag(s,10):'';
+
+  // Section overview
+  const sec=d.sections;
+  document.getElementById('secBars').innerHTML=
+    Object.values(sec).map(s=>secBar(s.label,s.avg)).join('');
+
+  // Q3 distribution
+  const q3=d.q3dist||{},n=d.n;
+  document.getElementById('q3dist').innerHTML=
+    [1,2,3,4,5].map(i=>{
+      const cnt=q3[String(i)]||0, pct=Math.round((cnt/n)*100);
+      const col=i<=2?'#22C55E':i===3?'#F59E0B':'#F43F5E';
+      return `<div class="dist-item">
+        <div class="dist-lbl"><span>${Q3L[i]}</span><span>${cnt} чел. · ${pct}%</span></div>
+        <div class="dist-track">
+          <div class="dist-fill" style="width:${pct}%;background:${col}">${pct>8?pct+'%':''}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+  // Question breakdowns
+  const q=d.questions;
+  document.getElementById('org').innerHTML= [qBar('q4',q.q4),qBar('q5',q.q5),qBar('q6',q.q6)].join('');
+  document.getElementById('comm').innerHTML=[qBar('q8',q.q8),qBar('q9',q.q9),qBar('q10',q.q10),qBar('q11',q.q11)].join('');
+  document.getElementById('mgmt').innerHTML=[qBar('q12',q.q12),qBar('q13',q.q13),qBar('q14',q.q14),qBar('q15',q.q15)].join('');
+  document.getElementById('atm').innerHTML= [qBar('q16',q.q16),qBar('q17',q.q17)].join('');
+
+  // Open-ended
+  const renderC=(arr,id)=>{
+    const el=document.getElementById(id);
+    el.innerHTML=arr?.length
+      ? arr.map(c=>`<div class="comment">${esc(c)}</div>`).join('')
+      : '<p class="no-data">Нет ответов на этот вопрос</p>';
+  };
+  renderC(d.openEnded.q7,'q7');
+  renderC(d.openEnded.q18,'q18');
+}
+
+load();
+setInterval(()=>{ if(document.getElementById('waiting').style.display!=='none') load(); },30000);
+</script>
+</body>
+</html>
